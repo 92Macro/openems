@@ -408,5 +408,10 @@
 			<artifactId>rrd4j</artifactId>
 			<version>3.9</version>
 		</dependency>
+		<dependency>
+		    <groupId>io.stepfunc</groupId>
+		    <artifactId>dnp3</artifactId>
+		    <version>1.4.1</version>
+		</dependency>		
 	</dependencies>
 </project>

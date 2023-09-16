@@ -1,0 +1,5 @@
+= io.openems.edge.loadshedding.api
+
+Implements a load shedding interface
+
+https://github.com/OpenEMS/openems/tree/develop/io.openems.edge.loadshedding.api[Source Code icon:github[]]
