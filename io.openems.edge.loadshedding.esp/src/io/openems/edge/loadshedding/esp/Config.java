@@ -22,6 +22,12 @@ import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 	
 	@AttributeDefinition(name = "Key", description = "Unique eskom-se-push api key")
 	String key() default "";
-
+	
+	@AttributeDefinition(name = "Is TestMode enabled?", description = "Tick to simulate active loadshedding")
+	boolean test() default false;	
+	
+	@AttributeDefinition(name = "Loadshed start time", description = "Input start time of Simulated Loadshedding")
+	long start_time() default 0;	
+	
 	String webconsole_configurationFactory_nameHint() default "Loadshedding Esp [{id}]";
 }

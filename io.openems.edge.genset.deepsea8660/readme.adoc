@@ -1,0 +1,3 @@
+= io.openems.edge.genset.deepsea8660
+
+https://github.com/OpenEMS/openems/tree/develop/io.openems.edge.genset.deepsea8660[Source Code icon:github[]]

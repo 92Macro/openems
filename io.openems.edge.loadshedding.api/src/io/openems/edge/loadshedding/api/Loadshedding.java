@@ -40,7 +40,7 @@ public interface Loadshedding extends OpenemsComponent {
 		 * <li>Unit: Seconds
 		 * </ul>
 		 */
-		TIMEOFSHEDSTART(Doc.of(OpenemsType.INTEGER)
+		TIME_OF_SHED_START(Doc.of(OpenemsType.INTEGER)
 				.unit(Unit.SECONDS)),//		
 		
 		/**
@@ -52,7 +52,7 @@ public interface Loadshedding extends OpenemsComponent {
 		 * <li>Unit: Seconds
 		 * </ul>
 		 */
-		TIMEOFSHEDEND(Doc.of(OpenemsType.INTEGER)
+		TIME_OF_SHED_END(Doc.of(OpenemsType.INTEGER)
 				.unit(Unit.SECONDS))	
 		;
 
@@ -112,7 +112,7 @@ public interface Loadshedding extends OpenemsComponent {
 	 * @return the Channel
 	 */
 	public default IntegerReadChannel getTimeOfShedStartChannel() {
-		return this.channel(ChannelId.TIMEOFSHEDSTART);
+		return this.channel(ChannelId.TIME_OF_SHED_START);
 	}
 
 	/**
@@ -150,7 +150,7 @@ public interface Loadshedding extends OpenemsComponent {
 	 * @return the Channel
 	 */
 	public default IntegerReadChannel getTimeOfShedEndChannel() {
-		return this.channel(ChannelId.TIMEOFSHEDEND);
+		return this.channel(ChannelId.TIME_OF_SHED_END);
 	}
 
 	/**
