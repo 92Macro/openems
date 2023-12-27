@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
 /*@EventTopics({ //
 	EdgeEventConstants.TOPIC_CYCLE_EXECUTE_WRITE //
 })*/
-public class EspImpl extends AbstractOpenemsComponent implements Esp, OpenemsComponent, Loadshedding/*, EventHandler*/ {
+public class EspImpl extends AbstractOpenemsComponent implements Esp, OpenemsComponent, Loadshedding {
 
 	private Config config = null;
 	private static final String ESP_API_URL = "https://developer.sepush.co.za/business/2.0/";
@@ -72,12 +72,12 @@ public class EspImpl extends AbstractOpenemsComponent implements Esp, OpenemsCom
         ZonedDateTime endDateTime  = ZonedDateTime.ofInstant(epochInstant, zoneId);
 		
         if (this.config.test()) {
-        	httpStatusCode = 200;
+        	httpStatusCode = 0;
         	stageNumber = 1;
         	
         	Instant epochTestStart = Instant.ofEpochSecond(this.config.start_time());
             startDateTime = ZonedDateTime.ofInstant(epochTestStart, zoneId);
-            Instant epochTestEnd = Instant.ofEpochSecond(this.config.start_time() + 7200);
+            Instant epochTestEnd = Instant.ofEpochSecond(this.config.start_time() + this.config.total_time());
             endDateTime  = ZonedDateTime.ofInstant(epochTestEnd, zoneId);
         }	//make use of override features..
         else {

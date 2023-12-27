@@ -4,12 +4,8 @@ import org.osgi.annotation.versioning.ProviderType;
 
 import io.openems.edge.common.channel.Doc;
 import io.openems.edge.common.component.OpenemsComponent;
-
-//import org.osgi.annotation.versioning.ProviderType;
-
 import io.openems.common.channel.Unit;
 import io.openems.common.types.OpenemsType;
-
 import io.openems.edge.common.channel.IntegerReadChannel;
 import io.openems.edge.common.channel.value.Value;
 

@@ -1,113 +1,44 @@
 package io.openems.edge.genset.deepsea8660;
 
-import org.osgi.service.event.EventHandler;
-
 import io.openems.common.channel.AccessMode;
-import io.openems.common.channel.PersistencePriority;
 import io.openems.common.channel.Unit;
 import io.openems.common.types.OpenemsType;
 import io.openems.edge.common.channel.Doc;
-import io.openems.edge.common.channel.IntegerDoc;
 import io.openems.edge.common.channel.IntegerReadChannel;
-import io.openems.edge.common.channel.IntegerWriteChannel;
 import io.openems.edge.common.channel.value.Value;
 import io.openems.edge.common.component.OpenemsComponent;
+import io.openems.edge.loadshedding.api.Loadshedding.ChannelId;
 
 
 public interface DeepSea8660 extends OpenemsComponent {
 
 	public enum ChannelId implements io.openems.edge.common.channel.ChannelId {
 		
-		/**
-		 * Read/Set Active Power Limit.
-		 * Load Level Setting kW
-		 * (for fixed export)
-		 * <ul>
-		 * <li>Interface: DeepSea8660
-		 * <li>Type: Integer
-		 * <li>Unit: W
-		 * </ul>
-		 */
-		ACTIVE_POWER_LIMIT(new IntegerDoc() //
-				.unit(Unit.PERCENT) //
-				.accessMode(AccessMode.READ_WRITE) //
-				.persistencePriority(PersistencePriority.MEDIUM) //
-				.onInit(channel -> { //
-					// on each Write to the channel -> set the value
-					((IntegerWriteChannel) channel).onSetNextWrite(value -> {
-						channel.setNextValue(value);
-					});
-				})),
-		/**
-		 * Read/Set Reactive Power Limit.
-		 * Load Level Setting kVAr
-		 * (for fixed export) 
-		 * <ul>
-		 * <li>Interface: DeepSea8660
-		 * <li>Type: Integer
-		 * <li>Unit: W
-		 * </ul>
-		 */
-		REACTIVE_POWER_LIMIT(new IntegerDoc() //
-				.unit(Unit.PERCENT) //
-				.accessMode(AccessMode.READ_WRITE) //
-				.persistencePriority(PersistencePriority.MEDIUM) //
-				.onInit(channel -> { //
-					// on each Write to the channel -> set the value
-					((IntegerWriteChannel) channel).onSetNextWrite(value -> {
-						channel.setNextValue(value);
-					});
-				})),
+		GRID_FREQUENCY(Doc.of(OpenemsType.INTEGER) //
+				.accessMode(AccessMode.READ_ONLY).unit(Unit.MILLIHERTZ)), //
+		GRID_L1_POWER(Doc.of(OpenemsType.INTEGER) //
+				.accessMode(AccessMode.READ_ONLY).unit(Unit.KILOWATT)), //
+		GRID_L2_POWER(Doc.of(OpenemsType.INTEGER) //
+				.accessMode(AccessMode.READ_ONLY).unit(Unit.KILOWATT)), //		
+		GRID_L3_POWER(Doc.of(OpenemsType.INTEGER) //
+				.accessMode(AccessMode.READ_ONLY).unit(Unit.KILOWATT)), //	
+		GRID_TOTAL_POWER(Doc.of(OpenemsType.INTEGER) //
+				.accessMode(AccessMode.READ_ONLY).unit(Unit.KILOWATT)), //	
+					
+		SYSTEM_CONTROL_KEY(Doc.of(OpenemsType.INTEGER) //
+				.accessMode(AccessMode.WRITE_ONLY)), //	
 		
-		/**
-		 * Read/Set bus or mains mode.
-		 * Bus / mains mode
-		 *
-		 * <ul>
-		 * <li>Interface: DeepSea8660
-		 * <li>Type: Integer
-		 * <li>Unit: NA
-		 * </ul>
-		 */
-		BUS_OR_MAINS_MODE(new IntegerDoc() //
-				.accessMode(AccessMode.READ_WRITE) //
-				.persistencePriority(PersistencePriority.MEDIUM) //
-				.onInit(channel -> { //
-					// on each Write to the channel -> set the value
-					((IntegerWriteChannel) channel).onSetNextWrite(value -> {
-						channel.setNextValue(value);
-					});
-				})),
-
+		SYSTEM_CONTROL_KEY_COMPLIMENT(Doc.of(OpenemsType.INTEGER) //
+				.accessMode(AccessMode.WRITE_ONLY)), //	
 		
-		/**
-		 * Enable / Disable generator using Remote control source 1.
-		 *
-		 * <ul>
-		 * <li>Interface: DeepSea8660
-		 * <li>Type: Integer
-		 * <li>Range: 0 - 1
-		 * </ul>
-		 */
-		REMOTE_CONTROL_SOURCE_1(new IntegerDoc() //
-				.accessMode(AccessMode.READ_WRITE) //
-				.persistencePriority(PersistencePriority.MEDIUM) //
-				.onInit(channel -> { //
-					// on each Write to the channel -> set the value
-					((IntegerWriteChannel) channel).onSetNextWrite(value -> {
-						channel.setNextValue(value);
-					});
-				}))
-
-		
-		/* @TODO: suggestions for other channels:
-		 * Active Power
-		 * Reactive Power
-		 * Fuel level
-		 * Frequency
-		 * 
-		 * 
-		 */
+		ACTIVE_POWER_LIMIT(Doc.of(OpenemsType.INTEGER) //
+				.accessMode(AccessMode.READ_WRITE).unit(Unit.PERCENT)), //
+		REACTIVE_POWER_LIMIT(Doc.of(OpenemsType.INTEGER) //
+				.accessMode(AccessMode.READ_WRITE).unit(Unit.PERCENT)), //
+		BUS_OR_MAINS_MODE(Doc.of(OpenemsType.INTEGER) //
+				.accessMode(AccessMode.READ_WRITE)), //
+		REMOTE_CONTROL_SOURCE_1(Doc.of(OpenemsType.INTEGER) //
+				.accessMode(AccessMode.READ_WRITE)), //
 		;
 
 		private final Doc doc;
@@ -132,22 +63,12 @@ public interface DeepSea8660 extends OpenemsComponent {
 	}
 
 	/**
-	 * Gets the Genset ActivePowerLimit. See {@link ChannelId#ACTIVE_POWER_LIMIT}.
+	 * Gets the Loadshedding stage. See {@link ChannelId#ACTIVE_POWER_LIMIT}.
 	 *
 	 * @return the Channel {@link Value}
 	 */
 	public default Value<Integer> getActivePowerLimit() {
 		return this.getActivePowerLimitChannel().value();
-	}
-
-	/**
-	 * Internal method to set the 'nextValue' on {@link ChannelId#ACTIVE_POWER_LIMIT}
-	 * Channel.
-	 *
-	 * @param value the next value
-	 */
-	public default void _setActivePowerLimit(Integer value) {
-		this.getActivePowerLimitChannel().setNextValue(value);
 	}
 
 	/**
@@ -170,22 +91,12 @@ public interface DeepSea8660 extends OpenemsComponent {
 	}
 
 	/**
-	 * Gets the Genset ReactivePowerLimit. See {@link ChannelId#REACTIVE_POWER_LIMIT}.
+	 * Gets the Loadshedding stage. See {@link ChannelId#REACTIVE_POWER_LIMIT}.
 	 *
 	 * @return the Channel {@link Value}
 	 */
 	public default Value<Integer> getReactivePowerLimit() {
 		return this.getReactivePowerLimitChannel().value();
-	}
-
-	/**
-	 * Internal method to set the 'nextValue' on {@link ChannelId#REACTIVE_POWER_LIMIT}
-	 * Channel.
-	 *
-	 * @param value the next value
-	 */
-	public default void _setReactivePowerLimit(Integer value) {
-		this.getReactivePowerLimitChannel().setNextValue(value);
 	}
 
 	/**
@@ -208,22 +119,12 @@ public interface DeepSea8660 extends OpenemsComponent {
 	}
 
 	/**
-	 * Gets the Genset BusOrMainsMode. See {@link ChannelId#BUS_OR_MAINS_MODE}.
+	 * Gets the Loadshedding stage. See {@link ChannelId#BUS_OR_MAINS_MODE}.
 	 *
 	 * @return the Channel {@link Value}
 	 */
 	public default Value<Integer> getBusOrMainsMode() {
 		return this.getBusOrMainsModeChannel().value();
-	}
-
-	/**
-	 * Internal method to set the 'nextValue' on {@link ChannelId#BUS_OR_MAINS_MODE}
-	 * Channel.
-	 *
-	 * @param value the next value
-	 */
-	public default void _setBusOrMainsMode(Integer value) {
-		this.getBusOrMainsModeChannel().setNextValue(value);
 	}
 
 	/**
@@ -246,7 +147,7 @@ public interface DeepSea8660 extends OpenemsComponent {
 	}
 
 	/**
-	 * Gets the Genset RemoteControlSource1. See {@link ChannelId#REMOTE_CONTROL_SOURCE_1}.
+	 * Gets the Loadshedding stage. See {@link ChannelId#REMOTE_CONTROL_SOURCE_1}.
 	 *
 	 * @return the Channel {@link Value}
 	 */
@@ -260,17 +161,81 @@ public interface DeepSea8660 extends OpenemsComponent {
 	 *
 	 * @param value the next value
 	 */
-	public default void _setRemoteControlSource1(Integer value) {
+	public default void _setRemoteControlSource1(int value) {
 		this.getRemoteControlSource1Channel().setNextValue(value);
 	}
 
 	/**
-	 * Internal method to set the 'nextValue' on {@link ChannelId#REMOTE_CONTROL_SOURCE_1}
+	 * Gets the Channel for {@link ChannelId#GRID_FREQUENCY}.
+	 *
+	 * @return the Channel
+	 */
+	public default IntegerReadChannel getGridFrequencyChannel() {
+		return this.channel(ChannelId.GRID_FREQUENCY);
+	}
+
+	/**
+	 * Gets the Grid Frequency. See {@link ChannelId#GRID_FREQUENCY}.
+	 *
+	 * @return the Channel {@link Value}
+	 */
+	public default Value<Integer> getGridFrequency() {
+		return this.getGridFrequencyChannel().value();
+	}
+	
+	/**
+	 * Gets the Channel for {@link ChannelId#GRID_TOTAL_POWER}.
+	 *
+	 * @return the Channel
+	 */
+	public default IntegerReadChannel getGridTotalPowerChannel() {
+		return this.channel(ChannelId.GRID_TOTAL_POWER);
+	}
+
+	/**
+	 * Gets the Grid Total Power. See {@link ChannelId#GRID_TOTAL_POWER}.
+	 *
+	 * @return the Channel {@link Value}
+	 */
+	public default Value<Integer> getGridTotalPower() {
+		return this.getGridTotalPowerChannel().value();
+	}
+	
+	/**
+	 * Gets the Channel for {@link ChannelId#SYSTEM_CONTROL_KEY}.
+	 *
+	 * @return the Channel
+	 */
+	public default IntegerReadChannel getSystemControlKeyChannel() {
+		return this.channel(ChannelId.SYSTEM_CONTROL_KEY);
+	}
+
+	/**
+	 * Internal method to set the 'nextValue' on {@link ChannelId#SYSTEM_CONTROL_KEY}
 	 * Channel.
 	 *
 	 * @param value the next value
 	 */
-	public default void _setRemoteControlSource1(int value) {
-		this.getRemoteControlSource1Channel().setNextValue(value);
+	public default void _setSystemControlKey(int value) {
+		this.getSystemControlKeyChannel().setNextValue(value);
+	}
+	
+	/**
+	 * Gets the Channel for {@link ChannelId#SYSTEM_CONTROL_KEY_COMPLIMENT}.
+	 *
+	 * @return the Channel
+	 */
+	public default IntegerReadChannel getSystemControlKeyComplimentChannel() {
+		return this.channel(ChannelId.SYSTEM_CONTROL_KEY_COMPLIMENT);
+	}
+
+	/**
+	 * Internal method to set the 'nextValue' on {@link ChannelId#SYSTEM_CONTROL_KEY_COMPLIMENT}
+	 * Channel.
+	 *
+	 * @param value the next value
+	 */
+	public default void _setSystemControlKeyCompliment(int value) {
+		this.getSystemControlKeyComplimentChannel().setNextValue(value);
 	}
 }

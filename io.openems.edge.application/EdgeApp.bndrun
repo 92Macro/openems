@@ -181,7 +181,9 @@
 	bnd.identity;id='io.openems.edge.timeofusetariff.tibber',\
 	bnd.identity;id='io.openems.edge.dnp3';version=latest,\
 	bnd.identity;id='io.openems.edge.loadshedding.api',\
-	bnd.identity;id='io.openems.edge.loadshedding.esp'
+	bnd.identity;id='io.openems.edge.loadshedding.esp',\
+	bnd.identity;id='io.openems.edge.genset.deepsea8660',\
+	bnd.identity;id='io.openems.edge.genset.deepsea.api'
 -runbundles: \
 	Java-WebSocket;version='[1.5.4,1.5.5)',\
 	com.fazecast.jSerialComm;version='[2.5.1,2.5.2)',\
@@ -405,4 +407,6 @@
 	io.openems.wrapper.dnp3;version=snapshot,\
 	org.jooq.joou-java-6;version='[0.9.4,0.9.5)',\
 	io.openems.edge.loadshedding.api;version=snapshot,\
-	io.openems.edge.loadshedding.esp;version=snapshot
+	io.openems.edge.loadshedding.esp;version=snapshot,\
+	io.openems.edge.genset.deepsea.api;version=snapshot,\
+	io.openems.edge.genset.deepsea8660;version=snapshot
