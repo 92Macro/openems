@@ -1,5 +1,7 @@
 package io.openems.backend.metadata.file;
 
+import static java.util.stream.Collectors.joining;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -31,7 +33,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import io.openems.backend.common.metadata.AbstractMetadata;
-import io.openems.backend.common.metadata.AlertingSetting;
+import io.openems.backend.common.metadata.UserAlertingSettings;
 import io.openems.backend.common.metadata.Edge;
 import io.openems.backend.common.metadata.EdgeHandler;
 import io.openems.backend.common.metadata.Metadata;
@@ -303,17 +305,17 @@ public class MetadataFile extends AbstractMetadata implements Metadata, EventHan
 	}
 
 	@Override
-	public List<AlertingSetting> getUserAlertingSettings(String edgeId) {
+	public List<UserAlertingSettings> getUserAlertingSettings(String edgeId) {
 		throw new UnsupportedOperationException("FileMetadata.getUserAlertingSettings() is not implemented");
 	}
 
 	@Override
-	public AlertingSetting getUserAlertingSettings(String edgeId, String userId) throws OpenemsException {
+	public UserAlertingSettings getUserAlertingSettings(String edgeId, String userId) throws OpenemsException {
 		throw new UnsupportedOperationException("FileMetadata.getUserAlertingSettings() is not implemented");
 	}
 
 	@Override
-	public void setUserAlertingSettings(User user, String edgeId, List<AlertingSetting> users) {
+	public void setUserAlertingSettings(User user, String edgeId, List<UserAlertingSettings> users) {
 		throw new UnsupportedOperationException("FileMetadata.setUserAlertingSettings() is not implemented");
 	}
 
@@ -353,7 +355,7 @@ public class MetadataFile extends AbstractMetadata implements Metadata, EventHan
 							Role.ADMIN, //
 							myEdge.isOnline(), //
 							myEdge.getLastmessage(), //
-							null, //
+							null, // firstSetupProtocol
 							Level.OK);
 				}).toList();
 	}
@@ -374,9 +376,18 @@ public class MetadataFile extends AbstractMetadata implements Metadata, EventHan
 				Role.ADMIN, //
 				edge.isOnline(), //
 				edge.getLastmessage(), //
-				null, //
+				null, // firstSetupProtocol
 				Level.OK //
 		);
+	}
+
+	@Override
+	public void logGenericSystemLog(GenericSystemLog systemLog) {
+		this.logInfo(this.log,
+				"%s on %s executed %s [%s]".formatted(systemLog.user().getId(), systemLog.edgeId(), systemLog.teaser(),
+						systemLog.getValues().entrySet().stream() //
+								.map(t -> t.getKey() + "=" + t.getValue()) //
+								.collect(joining(", "))));
 	}
 
 }

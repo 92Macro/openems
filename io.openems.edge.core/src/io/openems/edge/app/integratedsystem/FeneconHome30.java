@@ -9,11 +9,11 @@ import static io.openems.edge.app.integratedsystem.FeneconHomeComponents.ctrlEme
 import static io.openems.edge.app.integratedsystem.FeneconHomeComponents.ctrlEssSurplusFeedToGrid;
 import static io.openems.edge.app.integratedsystem.FeneconHomeComponents.emergencyMeter;
 import static io.openems.edge.app.integratedsystem.FeneconHomeComponents.ess;
-import static io.openems.edge.app.integratedsystem.FeneconHomeComponents.modbusExternal;
 import static io.openems.edge.app.integratedsystem.FeneconHomeComponents.gridMeter;
 import static io.openems.edge.app.integratedsystem.FeneconHomeComponents.gridOptimizedCharge;
-import static io.openems.edge.app.integratedsystem.FeneconHomeComponents.modbusInternal;
 import static io.openems.edge.app.integratedsystem.FeneconHomeComponents.io;
+import static io.openems.edge.app.integratedsystem.FeneconHomeComponents.modbusExternal;
+import static io.openems.edge.app.integratedsystem.FeneconHomeComponents.modbusInternal;
 import static io.openems.edge.app.integratedsystem.FeneconHomeComponents.power;
 import static io.openems.edge.app.integratedsystem.FeneconHomeComponents.predictor;
 import static io.openems.edge.app.integratedsystem.FeneconHomeComponents.prepareBatteryExtension;
@@ -71,6 +71,7 @@ import io.openems.edge.core.appmanager.OpenemsAppPermissions;
 import io.openems.edge.core.appmanager.TranslationUtil;
 import io.openems.edge.core.appmanager.Type;
 import io.openems.edge.core.appmanager.Type.Parameter.BundleParameter;
+import io.openems.edge.core.appmanager.dependency.Tasks;
 import io.openems.edge.core.appmanager.formly.Exp;
 import io.openems.edge.core.appmanager.formly.JsonFormlyUtil;
 
@@ -129,9 +130,7 @@ public class FeneconHome30 extends AbstractOpenemsAppWithProps<FeneconHome30, Pr
 		ALIAS(alias()), //
 
 		SAFETY_COUNTRY(AppDef.copyOfGeneric(safetyCountry(), def -> def //
-				.wrapField((app, property, l, parameter, field) -> {
-					field.isRequired(true);
-				}))), //
+				.setRequired(true))), //
 
 		FEED_IN_TYPE(feedInType()), //
 		MAX_FEED_IN_POWER(maxFeedInPower(FEED_IN_TYPE)), //
@@ -221,7 +220,9 @@ public class FeneconHome30 extends AbstractOpenemsAppWithProps<FeneconHome30, Pr
 
 			final var feedInType = this.getEnum(p, FeedInType.class, Property.FEED_IN_TYPE);
 			final var feedInSetting = this.getString(p, Property.FEED_IN_SETTING);
-			final var maxFeedInPower = this.getInt(p, Property.MAX_FEED_IN_POWER);
+			final var maxFeedInPower = feedInType == FeedInType.DYNAMIC_LIMITATION
+					? this.getInt(p, Property.MAX_FEED_IN_POWER)
+					: 0;
 
 			final var hasAcMeter = this.getBoolean(p, Property.HAS_AC_METER);
 			final var acType = this.getEnum(p, AcMeterType.class, Property.AC_METER_TYPE);
@@ -241,7 +242,7 @@ public class FeneconHome30 extends AbstractOpenemsAppWithProps<FeneconHome30, Pr
 					gridMeter(bundle, gridMeterId, modbusIdExternal), //
 					modbusInternal(bundle, t, modbusIdInternal), //
 					modbusExternal(bundle, t, modbusIdExternal), //
-					predictor(bundle), //
+					predictor(bundle, t), //
 					ctrlEssSurplusFeedToGrid(bundle, essId), //
 					power() //
 			);
@@ -259,7 +260,7 @@ public class FeneconHome30 extends AbstractOpenemsAppWithProps<FeneconHome30, Pr
 				}
 				final var chargerId = "charger" + i;
 				final var chargerAlias = this.getString(p, this.pvDefs.get(PV_ALIAS.apply(i)));
-				components.add(charger(chargerId, chargerAlias, batteryInverterId, modbusIdExternal, i));
+				components.add(charger(chargerId, chargerAlias, batteryInverterId, i));
 			}
 
 			List<String> schedulerExecutionOrder = new ArrayList<>();
@@ -280,7 +281,11 @@ public class FeneconHome30 extends AbstractOpenemsAppWithProps<FeneconHome30, Pr
 				dependencies.add(acType.getDependency(modbusIdExternal));
 			}
 
-			return new AppConfiguration(components, schedulerExecutionOrder, null, dependencies);
+			return AppConfiguration.create() //
+					.addTask(Tasks.component(components)) //
+					.addTask(Tasks.scheduler(schedulerExecutionOrder)) //
+					.addDependencies(dependencies) //
+					.build();
 		};
 	}
 

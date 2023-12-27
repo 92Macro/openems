@@ -20,7 +20,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import io.openems.backend.common.metadata.AlertingSetting;
+import io.openems.backend.common.metadata.UserAlertingSettings;
 import io.openems.backend.common.metadata.Edge;
 import io.openems.backend.common.metadata.EdgeUser;
 import io.openems.backend.common.metadata.User;
@@ -93,22 +93,6 @@ public class OdooHandler {
 					+ "User [" + edgeUser.getUserId() + "] " //
 					+ "Fields [" + Stream.of(fieldValues).map(FieldValue::toString).collect(Collectors.joining(","))
 					+ "]: " + e.getMessage());
-		}
-	}
-
-	/**
-	 * Adds a message in Odoo Chatter ('mail.thread').
-	 *
-	 * @param edge    the Edge
-	 * @param message the message
-	 */
-	public void addChatterMessage(MyEdge edge, String message) {
-		try {
-			OdooUtils.addChatterMessage(this.credentials, Field.EdgeDevice.ODOO_MODEL, edge.getOdooId(), message);
-		} catch (OpenemsException e) {
-			this.parent.logError(this.log, "Unable to add Chatter Message to Edge [" + edge.getId() + "] " //
-					+ "Message [" + message + "]" //
-					+ ": " + e.getMessage());
 		}
 	}
 
@@ -400,7 +384,8 @@ public class OdooHandler {
 	 * @throws OpenemsNamedException on error
 	 */
 	public byte[] getOdooSetupProtocolReport(int setupProtocolId) throws OpenemsNamedException {
-		return OdooUtils.getOdooReport(this.credentials, "openems.report_openems_setup_protocol_template", setupProtocolId);
+		return OdooUtils.getOdooReport(this.credentials, "openems.report_openems_setup_protocol_template",
+				setupProtocolId);
 	}
 
 	/**
@@ -1118,7 +1103,7 @@ public class OdooHandler {
 	 * @return list of alerting settings
 	 * @throws OpenemsException on error
 	 */
-	public List<AlertingSetting> getUserAlertingSettings(String edgeId) throws OpenemsException {
+	public List<UserAlertingSettings> getUserAlertingSettings(String edgeId) throws OpenemsException {
 		return this.requestUserAlertingSettings(edgeId, null);
 	}
 
@@ -1127,15 +1112,15 @@ public class OdooHandler {
 	 *
 	 * @param edgeId ID of Edge
 	 * @param userId ID of User
-	 * @return {@link AlertingSetting} or {@link null} if no settings are stored
+	 * @return {@link UserAlertingSettings} or {@link null} if no settings are stored
 	 * @throws OpenemsException on error
 	 */
-	public AlertingSetting getUserAlertingSettings(String edgeId, String userId) throws OpenemsException {
+	public UserAlertingSettings getUserAlertingSettings(String edgeId, String userId) throws OpenemsException {
 		var settings = this.requestUserAlertingSettings(edgeId, userId);
 		return settings.isEmpty() ? null : settings.get(0);
 	}
 
-	private List<AlertingSetting> requestUserAlertingSettings(String edgeId, String userId) throws OpenemsException {
+	private List<UserAlertingSettings> requestUserAlertingSettings(String edgeId, String userId) throws OpenemsException {
 		// Define Fields
 		var edgeUserFields = new Field[] { //
 				Field.EdgeDeviceUserRole.ID, //
@@ -1167,7 +1152,7 @@ public class OdooHandler {
 			usersMap.put(userIds[i], users[i]);
 		}
 		// create result list;
-		var result = new ArrayList<AlertingSetting>(edgeUsers.length);
+		var result = new ArrayList<UserAlertingSettings>(edgeUsers.length);
 		for (var edgeUser : edgeUsers) {
 			var userIdsArr = OdooUtils.getAs(Field.EdgeDeviceUserRole.USER_ODOO_ID, edgeUser, Object[].class);
 			if (userIdsArr.length != 2) {
@@ -1184,7 +1169,7 @@ public class OdooHandler {
 							edgeUser, String.class, null);
 					var lastNotification = OdooUtils.DateTime.stringToDateTime(lastNotificationStr);
 					result.add(
-							new AlertingSetting(edgeUserId, login, Role.getRole(role), lastNotification, timeToWait));
+							new UserAlertingSettings(edgeUserId, login, Role.getRole(role), lastNotification, timeToWait));
 				}
 			}
 		}
@@ -1199,7 +1184,7 @@ public class OdooHandler {
 	 * @param userAlertingSettings list of users
 	 * @throws OpenemsException on error
 	 */
-	public void setUserAlertingSettings(MyUser user, String edgeId, List<AlertingSetting> userAlertingSettings)
+	public void setUserAlertingSettings(MyUser user, String edgeId, List<UserAlertingSettings> userAlertingSettings)
 			throws OpenemsException {
 		// search edge by id
 		var edgeIds = OdooUtils.search(this.credentials, Field.EdgeDevice.ODOO_MODEL,

@@ -35,7 +35,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import io.openems.backend.common.metadata.AbstractMetadata;
-import io.openems.backend.common.metadata.AlertingSetting;
+import io.openems.backend.common.metadata.UserAlertingSettings;
 import io.openems.backend.common.metadata.AppCenterMetadata;
 import io.openems.backend.common.metadata.Edge;
 import io.openems.backend.common.metadata.EdgeHandler;
@@ -355,6 +355,18 @@ public class MetadataOdoo extends AbstractMetadata implements AppCenterMetadata,
 		}
 	}
 
+	@Override
+	public void logGenericSystemLog(GenericSystemLog systemLog) {
+		this.executor.execute(() -> {
+			try {
+				final var edge = (MyEdge) this.getEdgeOrError(systemLog.edgeId());
+				this.postgresHandler.edge.insertGenericSystemLog(edge.getOdooId(), systemLog);
+			} catch (SQLException | OpenemsNamedException e) {
+				this.logWarn(this.log, "Unable to insert ");
+			}
+		});
+	}
+
 	private void onSetConfigEvent(EventReader reader) {
 		this.executor.execute(() -> {
 			var edge = (MyEdge) reader.getProperty(Edge.Events.OnSetConfig.EDGE);
@@ -372,7 +384,10 @@ public class MetadataOdoo extends AbstractMetadata implements AppCenterMetadata,
 			var diff = EdgeConfigDiff.diff(newConfig, oldConfig);
 			if (diff.isDifferent()) {
 				// Update "EdgeConfigUpdate"
-				this.logInfo(this.log, "Edge [" + edge.getId() + "]. Update config: " + diff.toString());
+				var diffString = diff.toString();
+				if (!diffString.isBlank()) {
+					this.logInfo(this.log, "Edge [" + edge.getId() + "]. Update config: " + diff.toString());
+				}
 
 				try {
 					this.postgresHandler.edge.insertEdgeConfigUpdate(edge.getOdooId(), diff);
@@ -485,17 +500,17 @@ public class MetadataOdoo extends AbstractMetadata implements AppCenterMetadata,
 	}
 
 	@Override
-	public List<AlertingSetting> getUserAlertingSettings(String edgeId) throws OpenemsException {
+	public List<UserAlertingSettings> getUserAlertingSettings(String edgeId) throws OpenemsException {
 		return this.odooHandler.getUserAlertingSettings(edgeId);
 	}
 
 	@Override
-	public AlertingSetting getUserAlertingSettings(String edgeId, String userId) throws OpenemsException {
+	public UserAlertingSettings getUserAlertingSettings(String edgeId, String userId) throws OpenemsException {
 		return this.odooHandler.getUserAlertingSettings(edgeId, userId);
 	}
 
 	@Override
-	public void setUserAlertingSettings(User user, String edgeId, List<AlertingSetting> users) throws OpenemsException {
+	public void setUserAlertingSettings(User user, String edgeId, List<UserAlertingSettings> users) throws OpenemsException {
 		this.odooHandler.setUserAlertingSettings((MyUser) user, edgeId, users);
 	}
 

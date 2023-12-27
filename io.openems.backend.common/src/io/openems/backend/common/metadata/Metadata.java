@@ -295,10 +295,10 @@ public interface Metadata {
 	 *
 	 *
 	 * @param edgeId the Edge ID
-	 * @return List of {@link AlertingSetting}
+	 * @return List of {@link UserAlertingSettings}
 	 * @throws OpenemsException on error
 	 */
-	public List<AlertingSetting> getUserAlertingSettings(String edgeId) throws OpenemsException;
+	public List<UserAlertingSettings> getUserAlertingSettings(String edgeId) throws OpenemsException;
 
 	/**
 	 * Gets the alerting settings for given edge id and userId.
@@ -308,7 +308,7 @@ public interface Metadata {
 	 * @return List of {@link UserRoleDelayTime}
 	 * @throws OpenemsException on error
 	 */
-	public AlertingSetting getUserAlertingSettings(String edgeId, String userId) throws OpenemsException;
+	public UserAlertingSettings getUserAlertingSettings(String edgeId, String userId) throws OpenemsException;
 
 	/**
 	 * Sets the alerting settings for the given list of users.
@@ -318,7 +318,7 @@ public interface Metadata {
 	 * @param users  list of users to update
 	 * @throws OpenemsException on error
 	 */
-	public void setUserAlertingSettings(User user, String edgeId, List<AlertingSetting> users) throws OpenemsException;
+	public void setUserAlertingSettings(User user, String edgeId, List<UserAlertingSettings> users) throws OpenemsException;
 
 	/**
 	 * Returns an EventAdmin, used by Edge objects.
@@ -364,5 +364,43 @@ public interface Metadata {
 	 * @throws OpenemsNamedException on error
 	 */
 	public EdgeMetadata getEdgeMetadataForUser(User user, String edgeId) throws OpenemsNamedException;
+
+	public interface GenericSystemLog {
+
+		/**
+		 * Gets the edgeId of the target log.
+		 * 
+		 * @return the edgeId
+		 */
+		public String edgeId();
+
+		/**
+		 * Gets the user which triggered the log.
+		 * 
+		 * @return the user
+		 */
+		public User user();
+
+		/**
+		 * Gets a short string which represents the whole log.
+		 * 
+		 * @return the teaser string
+		 */
+		public String teaser();
+
+		/**
+		 * Gets a map of values of the log.
+		 * 
+		 * @return the map
+		 */
+		public Map<String, String> getValues();
+	}
+
+	/**
+	 * Handles a Systemlog-Message.
+	 * 
+	 * @param systemLog the log
+	 */
+	public void logGenericSystemLog(GenericSystemLog systemLog);
 
 }
